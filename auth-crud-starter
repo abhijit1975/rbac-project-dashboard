@@ -1,0 +1,27 @@
+#!/bin/bash
+
+# --- RBAC PROJECT DASHBOARD STARTER SCRIPT ---
+echo "============================================="
+echo "🚀 Starting RBAC Project Management Dashboard"
+echo "============================================="
+
+# 1. Verify Node.js is installed
+if ! command -v node &> /dev/null; then
+    echo "❌ Error: Node.js is not installed on this Linux system."
+    exit 1
+fi
+
+# 2. Check and install dependencies if package.json exists
+if [ -f "package.json" ]; then
+    echo "📦 Checking and installing dependencies..."
+    npm install
+else
+    echo "⚠️ Warning: package.json not found in the current directory."
+fi
+
+# 3. Spin up the Vite development local web server
+echo "🌐 Launching your frontend development server..."
+echo "👉 Hold Ctrl and click the localhost link below when it appears:"
+echo "--------------------------------------------------------"
+
+npm run dev
