@@ -3,58 +3,93 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.models.project import Project
-from app.schemas.project import ProjectCreate, ProjectResponse
+from app.schemas.project import ProjectCreate, ProjectUpdate
 from app.dependencies.auth import get_current_user
-from app.models.user import User
+from app.dependencies.rbac import require_admin, require_owner_or_admin
 
-router = APIRouter(prefix="/projects", tags=["Projects"])
+router = APIRouter(prefix="/api/v1/projects", tags=["Projects"])
 
 
-# CREATE
-@router.post("/", response_model=ProjectResponse)
+# -------------------------
+# CREATE PROJECT
+# -------------------------
+@router.post("/")
 def create_project(
-    project: ProjectCreate,
+    data: ProjectCreate,
     db: Session = Depends(get_db),
-    user: User = Depends(get_current_user)
+    current_user=Depends(get_current_user)
 ):
-
-    new_project = Project(
-        name=project.name,
-        description=project.description,
-        owner_id=user.id
+    project = Project(
+        name=data.name,
+        description=data.description,
+        owner_id=current_user.id
     )
 
-    db.add(new_project)
+    db.add(project)
     db.commit()
-    db.refresh(new_project)
+    db.refresh(project)
 
-    return new_project
+    return project
 
 
-# GET ALL (user-specific)
-@router.get("/", response_model=list[ProjectResponse])
+# -------------------------
+# GET ALL PROJECTS
+# -------------------------
+@router.get("/")
 def get_projects(
     db: Session = Depends(get_db),
-    user: User = Depends(get_current_user)
+    current_user=Depends(get_current_user)
 ):
+    # admin sees all, user sees only own
+    if current_user.role == "admin":
+        return db.query(Project).all()
 
-    return db.query(Project).filter(Project.owner_id == user.id).all()
+    return db.query(Project).filter(Project.owner_id == current_user.id).all()
 
 
-# GET BY ID
-@router.get("/{project_id}", response_model=ProjectResponse)
-def get_project(
+# -------------------------
+# UPDATE PROJECT
+# -------------------------
+@router.put("/{project_id}")
+def update_project(
     project_id: int,
+    data: ProjectUpdate,
     db: Session = Depends(get_db),
-    user: User = Depends(get_current_user)
+    current_user=Depends(get_current_user)
 ):
-
-    project = db.query(Project).filter(
-        Project.id == project_id,
-        Project.owner_id == user.id
-    ).first()
+    project = db.query(Project).filter(Project.id == project_id).first()
 
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
 
+    require_owner_or_admin(current_user, project.owner_id)
+
+    for key, value in data.dict(exclude_unset=True).items():
+        setattr(project, key, value)
+
+    db.commit()
+    db.refresh(project)
+
     return project
+
+
+# -------------------------
+# DELETE PROJECT (ADMIN ONLY)
+# -------------------------
+@router.delete("/{project_id}")
+def delete_project(
+    project_id: int,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user)
+):
+    require_admin(current_user)
+
+    project = db.query(Project).filter(Project.id == project_id).first()
+
+    if not project:
+        raise HTTPException(status_code=404, detail="Project not found")
+
+    db.delete(project)
+    db.commit()
+
+    return {"message": "Project deleted"}
