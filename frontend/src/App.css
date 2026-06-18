@@ -1,0 +1,101 @@
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #0b0f19;
+  color: white;
+}
+
+/* layout */
+.app {
+  display: flex;
+  height: 100vh;
+}
+
+/* sidebar */
+.sidebar {
+  width: 220px;
+  background: #0f172a;
+  padding: 20px;
+  border-right: 1px solid #1e293b;
+}
+
+.logo {
+  color: #00f5ff;
+  text-shadow: 0 0 10px #00f5ff;
+}
+
+/* main */
+.main {
+  flex: 1;
+  padding: 20px;
+}
+
+.title {
+  color: #00f5ff;
+  text-shadow: 0 0 12px #00f5ff;
+}
+
+/* cards */
+.cards {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.card {
+  flex: 1;
+  padding: 15px;
+  border-radius: 10px;
+  background: #111827;
+  border: 1px solid #1f2937;
+}
+
+.neon {
+  box-shadow: 0 0 15px #00f5ff;
+}
+
+.neon-blue {
+  box-shadow: 0 0 15px #3b82f6;
+}
+
+.neon-pink {
+  box-shadow: 0 0 15px #ec4899;
+}
+
+/* table */
+.table {
+  background: #111827;
+  border-radius: 10px;
+  padding: 10px;
+  border: 1px solid #1f2937;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px;
+  border-bottom: 1px solid #1f2937;
+}
+
+/* badges */
+.badge {
+  padding: 4px 8px;
+  border-radius: 5px;
+  font-size: 12px;
+}
+
+.active {
+  background: #22c55e;
+}
+
+.completed {
+  background: #3b82f6;
+}
+
+.draft {
+  background: #f59e0b;
+}
+
+.archived {
+  background: #ef4444;
+}
